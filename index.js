@@ -39,8 +39,10 @@ server.get(`/api/users/:id`, (req, res)=> {
 server.post('/api/users', (req, res)=> {
     const newUser = req.body;
     console.log('newUser data:', newUser);
-
-    db.post(newUser)
+    if('name' === null || 'bio' === null){
+        res.status(400).json({error: 'Please give name and bio.'})
+    } else {
+    db.insert(newUser)
         .then(user=> {
             res.status(201).json(user);
         })
@@ -48,13 +50,14 @@ server.post('/api/users', (req, res)=> {
             console.log('Error:', err);
             res.status(500).json({error: 'Unable to add new user.'});
         });
+    }
 });
 
 
 //PUT
 server.put('/api/users/:id', (req, res) => {
     const id = req.params.id;
-    db.find(id).then(user=>{
+    db.findById(id).then(user=>{
         res.status(200).send(user)
     })
     .catch(err=> {
@@ -67,7 +70,9 @@ server.put('/api/users/:id', (req, res) => {
 //DELETE
 server.delete('/api/users/:id', (req, res) => {
     const id = req.params.id;
-
+    if (!id){
+        res.status(404).json({error: 'There is no user with that id'});
+    } else {
     db.remove(id).then(count=> {
         res.status(200).json({message: `Twas deleted.`});
     })
@@ -76,6 +81,7 @@ server.delete('/api/users/:id', (req, res) => {
         console.log('Error:', err);
         res.status(500).json({error: 'Failed to delete user by id.'});
     });
+    }
 });
 
 
